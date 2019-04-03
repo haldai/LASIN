@@ -1,6 +1,0 @@
-%meta rules for hierarchical learning
-metarule(father_constraint, [P/1, Q/2, R/Ra | U], ([P, X] :- [Q, C, X], B)) :-
-    B = [R, X|U],
-    arity(B, Ra),
-    % Order test of predicate? order test of arguments!!
-    pred_above(P/1,Q/1,Prog), pred_above(P/1,R/Ra,Prog).
