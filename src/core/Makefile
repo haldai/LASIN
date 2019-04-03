@@ -9,22 +9,19 @@ OBJFILES = $(patsubst %.cpp,%.o,$(SRCFILES))
 
 CXX = g++
 MAKE = make
-CXXFLAGS = -Wall -std=c++11 -fPIC $(COFLAGS) $(INCLUDE)
+CXXFLAGS = -Wall -std=c++11 -fPIC -fopenmp $(COFLAGS) $(INCLUDE)
 COFLAGS = -DO_DEBUG -gdwarf-2 -g -O0
-LDFLAGS = -Wall -Winvalid-pch -fPIC $(LIBS) $(COFLAGS)
+LDFLAGS = -Wall -Winvalid-pch -fPIC -fopenmp $(LIBS) $(COFLAGS)
 INCLUDE = -I$(SRCDIR) -I$(ARFFDIR) -I$(INCLUDEDIR) -I$(HOME)/.local/include
 LIBS = -L$(SRCDIR) -L$(ARFFDIR) -L$(LIBSDIR) -L$(HOME)/.local/lib
 
 # Library prefix
-MLPACK_HOME = /home/daiwz/.local
+CXXFLAGS_MLPACK = `pkg-config --cflags mlpack`
+LDFLAGS_MLPACK = `pkg-config --libs mlpack`
 
 # SWI-prolog
 CXXFLAGS_SWI = `pkg-config --cflags swipl`
 LDFLAGS_SWI = `pkg-config --libs swipl`
-
-# mlpack library
-CXXFLAGS_MLPACK = -I$(MLPACK_HOME)/include
-LDFLAGS_MLPACK = -L$(MLPACK_HOME) -larmadillo -lmlpack -lboost_serialization
 
 all:test pl_data.so pl_models.so pl_mnist.so pl_cluster.so
 

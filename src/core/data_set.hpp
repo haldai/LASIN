@@ -330,19 +330,19 @@ vector<uword> MLDataSet::parse_features(ArffData *arff_data) {
     for (uword dim = 0; dim < re.size(); dim++) {
         uword f_idx = re[dim];
         ArffAttr *attr = arff_data->get_attr(f_idx);
-        
+
         // compute mean, median and transform nominal to numerical
         using namespace boost::accumulators;
         accumulator_set<double, stats<boost::accumulators::tag::mean, boost::accumulators::tag::median(with_p_square_quantile)>> acc;
         // for each instance, apply accumulation
         for (uword i = 0; i < num_inst; i++) {
             ArffValue *val = arff_data->get_instance(i)->get(f_idx);
-                
+
             if (!val->missing()) {
                 double val_e;
                 if (attr->type() == NOMINAL || attr->type() == H_NOMINAL) {
                     string trimmedToken((string) *val);
-                    val_e = m_mapper->MapString(trimmedToken, dim);
+                    val_e = m_mapper->MapString<uword>(trimmedToken, dim);
                 } else {
                     val_e = (double) *val;
                 }
@@ -370,7 +370,7 @@ void MLDataSet::read_instance_features(ArffData *arff_data, int missing) {
                 double val_e;
                 if (attr->type() == NOMINAL || attr->type() == H_NOMINAL) {
                     string trimmedToken((string) *val);
-                    val_e = m_mapper->MapString(trimmedToken, f);
+                    val_e = m_mapper->MapString<uword>(trimmedToken, f);
                 } else {
                     val_e = (double) *val;
                 }
