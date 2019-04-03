@@ -1,7 +1,19 @@
 # LASIN
-Combining Logical Abduction and Statistical INduction
+Code and data for AAAI17 paper _Combining Logical Abduction and Statistical INduction_.
 
 # Usage
+
+## Prequesities
+
+- [mlpack](https://www.mlpack.org/)
+- [swi-prolog](http://www.swi-prolog.org/)
+
+## Compile
+
+TBD.
+
+## Running
+
 TBD.
 
 # Reference
