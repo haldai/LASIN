@@ -1,0 +1,185 @@
+:- ['test_label.pl'],
+   ['learn_rule.pl'],
+   ['eval_rule.pl'],
+   ['metarules.pl'],
+   ['bk.pl'].
+
+test_cls(X):-
+    write(X), nl,
+    get_data_size(X, S),
+    write("data size: "), write(size), nl,
+    test_learn(X, Y),
+    write(Y), nl,
+    test_test(X, Y),
+    findall(Z, classifier(Z), CC),
+    write("classifiers: ") , write(CC), nl,
+    free_classifier(Z),
+    write("free classifier SUCCEEDED!"), nl,
+    (classifier(Z) ->
+        (write("classifier: "), write(Z), nl);
+        (write("classifier: NONE!"), nl)
+    ).
+
+% dataPath '../../data/hierarchy/cellcycle_FUN.train.arff'
+% DataPatch is the classification data stored in heap
+test_go(DataPatch):-
+    %load_data_with_label('../../data/hierarchy/cellcycle_FUN.train.arff', L, DataPatch),
+    test_learn(DataPatch, Y),
+    write('Learned: '), write(Y), nl,
+    get_data_size(DataPatch, S),
+    Size is S - 1,
+    interval(0, Size, Int),
+    write('Sel: '), write(Int), nl,
+    stat_classifier(DataPatch, Int, Model, Sat),
+    write(DataPatch), write(' size: '), write(S), nl,
+    write('Clsfr: '), write(Model), nl,
+    findall(Z, classifier(Z), CC),
+    write("Asserted classifiers: ") , write(CC), nl,
+    write('Sat: '), write(Sat), nl,
+    current_module(Mod),
+    write('Current Module: '), write(Mod), nl.
+
+test_gogogo(DataPatch):-
+    write('gogogo!'), nl,
+    findall(Hyp, test_run(l01/3, DataPatch, Hyp), ALL_HYPS),
+    %test_run('01'/3, DataPatch, Hyp),
+    length(ALL_HYPS, Len),
+    write("Learned "), write(Len), write(" Programs:"), nl,
+    printprogs(ALL_HYPS).
+
+load_data(L, DataPatch):-
+    load_data_with_label('../../data/hierarchy/cellcycle_FUN.train.arff', L, DataPatch),
+    write('Loaded data: '), write(DataPatch), nl.
+
+test_gogo:-
+    test_gogo(_).
+
+test_gogo(Hyp):-
+    init_ps(P0),
+    test_go_multi([l01/3, l01_01/3], [0, 1], P0, Hyp).    
+    %get_clause_meta_subs([Hyp], Progs).
+    %findall(Hyp, learn_single(l01/3, DataPatch, Hyp), ALL_HYPS),
+    %length(ALL_HYPS, Len),
+    %write("Learned "), write(Len), write(" Programs."), nl,
+    %print_list_ln(ALL_HYPS),
+    %printprogs(ALL_HYPS),
+    %free_ptr(DataPatch).
+
+test_go_multi([], [], Hyp, Hyp).
+test_go_multi([Pred | Preds], [L | Ls], BK, Hyp):-
+    write("Learn target #"), write(L), write(": "), write(Pred), nl,
+    load_data(L, DataPatch),
+    learn_single(Pred, BK, DataPatch, 2, Hyp1),
+    %test_run('01'/3, DataPatch, Hyp),
+    embed_bk(BK, Hyp1, BK1),
+    printprogs([Hyp1]),
+    free_ptr(DataPatch),
+    test_go_multi(Preds, Ls, BK1, Hyp).
+
+test_eval(Pred, L, BK, Hyp):-
+    load_data(L, DataPatch),
+    eval_single(Pred, BK, DataPatch, Hyp, Acc).
+
+test_eval_gogo(Hyp):-
+    test_eval_multi([l01/3, l01_01/3], [0, 1], Hyp),
+    !.
+
+test_eval_multi([], [], _).
+test_eval_multi([Pred | Preds], [L | Ls], Hyp):-
+    write("Evaluate target #"), write(L), write(": "), write(Pred), nl,
+    load_data(L, DataPatch),
+    eval_pred_in_hyp(Pred, Hyp, DataPatch, eval_range, AUC),
+    write("AUC ROC: "), write(AUC), nl,
+    test_eval_multi(Preds, Ls, Hyp).
+
+
+test_run(Pred/A, DataPatch, Hyp):-
+    interval(1, 2, I), % interval of learn new predicates
+    init_ps(P0),
+    get_data_size(DataPatch, Size), % get datapatch size (cpp lib)
+    S is Size - 1,
+    interval(0, S, Range1),
+    %write(Range1), nl,
+    test_pl(I, Pred/A, P0, DataPatch, Range1, Hyp).
+
+test_pl(Int, Pred/A, Prog0, DataPatch, Range1, Prog2):-
+    Prog0 = ps(Ms0, sig(Ps0, Cs0), Lim1, MetaRules),
+    write('Prog0: '), write(Prog0), nl,
+    element(N, Int),
+    peano(N, Lim1),
+    write('N and Lim1: '), write(N), write(' '), write(Lim1), nl,
+    name(Pred, PredChars), % char of label name
+    N1 is N - 1,
+    addnewpreds(PredChars, 0, N1, Ps0, Ps1),
+    Prog1 = ps(Ms0, sig([Pred/A | Ps1], Cs0), Lim1, MetaRules),
+    %write('Prog1: '), write(Prog1), nl,
+    %test_learn([Atom_v-Range], Prog1, DataPatch, Prog2).
+    test_recursive_learn(Pred/A, Prog1, DataPatch, Range1, Prog2, Range2).
+
+test_recursive_learn(Pred/A, Prog1, DataPatch, Range1, Prog2, Range2):-
+    temp_vars(A, Vars),
+    Atom_v = [Pred | Vars], % variable template for goal predicate
+    test_learn_range([Atom_v], Prog1, DataPatch, Range1, Prog3, Range3),
+    % @TODO: if the coverage is not comlete, update Range and make another try!!!!!!!!
+    list_complement(Range1, Range3, RangeC),
+    % if Range3 still contains positive instance (which has descendent label?)
+    % and the program size limit hasn't reached, then continue learning.
+    Prog3 = ps(_, _, Lim3, _),
+    ((data_range_chk_positive(DataPatch, RangeC), Lim3 \== 0) ->
+         (test_recursive_learn(Pred/A, Prog3, DataPatch, RangeC,
+                               Prog2, Range2), !);
+     (Prog2 = Prog3, Range2 = Range3, !)
+    ).
+
+% Learn body, range changes
+% learn_body(Preds, Prog1, Data, Range1, Prog2, Range2).
+% @TODO: check satisfiability, if coverage not enough, 
+
+test_learn_range([], Prog, _, Range, Prog, Range).
+test_learn_range([Pred | Preds], Prog1, DataPatch, Range1, Prog2, Range2):-
+    % deductive prove does not change
+    test_d_prove([Pred], Prog1, DataPatch, Range1, Range3),
+    test_learn_range(Preds, Prog1, DataPatch, Range3, Prog2, Range2).
+test_learn_range([Pred | Preds], Prog1, DataPatch, Range1, Prog2, Range2):-
+    metarule(RuleName, MetaSub, (Pred:-Body), PreTest, Prog1),
+    write('PRETEST BINDING: '), nl, write(PreTest), nl,
+    call(PreTest),
+    abduce(metasub(RuleName, MetaSub), Prog1, Prog3),
+    %printprog([metasub(RuleName, MetaSub)]), nl,
+    Prog3 = ps(_, _, Left, _),
+    write('CLAUSES LEFT = '), write(Left), nl,
+    test_learn_range(Body, Prog3, DataPatch, Range1, Prog4, Range3),
+    test_learn_range(Preds, Prog4, DataPatch, Range3, Prog2, Range2).
+
+% test deductive proving
+% Deductive proving
+% d_prove(Pred, DataPatch, Program, Range1, Range2).
+% deductive prove the Predicate in Range1,
+% and return satisfied instances in Range2
+test_d_prove([], _, _, Range, Range).
+test_d_prove([Atom | Atoms], Prog, DataPatch, Range1, Range2):-
+    %***---primatom(Atom), !, otherwise, examples with recursive are not called
+    test_d_prove_pred_range(Atom, Prog, DataPatch, Range1, Range3),
+    test_d_prove(Atoms, DataPatch, Prog, Range3, Range2).
+test_d_prove([Atom | Atoms], Prog, DataPatch, Range1, Range2):-
+    % Atom is a list of Constant/Variables
+    %write('D: Prog='), write(Prog), nl, 
+    Prog = ps(Ms, _, _, _),
+    M = metasub(RuleName, MetaSub), element(M, Ms),
+    metarule(RuleName, MetaSub, (Atom:-Body), PreTest, Prog),
+    %write('D: TRYING CLAUSE:'), nl, printprog([metasub(RuleName,MetaSub)]), 
+    call(PreTest),
+    %write('D: Passed PreTest'), nl, 
+    test_d_prove(Body, Prog, DataPatch, Range1, Range3),
+    test_d_prove(Atoms, Prog, DataPatch, Range3, Range2).
+
+% deductive prove one predicate
+test_d_prove_pred_range([stat_classifier, _, _, C, _], Prog,
+                        DataPatch, Range1, Range2):-
+    % if the predicate is stat_classifier/4
+    stat_classifier(DataPatch, Range1, C, Range2),
+    Range2 \== [], !.
+test_d_prove_pred_range([Pred, _, _, _], Prog, DataPatch, Range1, Range2):-
+    callatom([Pred, DataPatch, Range1, Range2]),
+    Range2 \== [], !.
+

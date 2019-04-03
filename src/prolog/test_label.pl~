@@ -1,0 +1,13 @@
+% labels for test
+father('G001', 'G002').
+father('G001', 'G003').
+father('G003', 'G004').
+father('G002', 'G004').
+father('G001', 'G005').
+father('G004', 'G005').
+
+% primitives
+primitives(['G001'/3, 'G000'/3, 'G002'/3, 'G003'/3, stat_classifier/4]).
+%primitives(['G001'/1, 'G000'/1, stat_cls/2]).
+metarules([father_con, stat_cls]).
+

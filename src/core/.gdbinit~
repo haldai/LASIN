@@ -1,0 +1,3 @@
+# filename: .gdbinit
+# gdb will read it when starting
+set solib-search-path /home/daiwz/.local/lib/

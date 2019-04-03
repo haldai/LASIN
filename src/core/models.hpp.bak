@@ -1,0 +1,124 @@
+#ifndef _MODELS_HPP_
+#define _MODELS_HPP_
+
+#include "memread.hpp"
+#include "data_set.hpp"
+#include "data_patch.hpp"
+#include "utils.hpp"
+
+#include <armadillo>
+#include <mlpack/core.hpp>
+#include <mlpack/methods/adaboost/adaboost.hpp>
+#include <mlpack/methods/hoeffding_trees/hoeffding_tree.hpp>
+#include <mlpack/methods/hoeffding_trees/binary_numeric_split.hpp>
+#include <mlpack/methods/hoeffding_trees/information_gain.hpp>
+
+using namespace std;
+using namespace arma;
+using namespace mlpack;
+using namespace mlpack::adaboost;
+using namespace mlpack::tree;
+using namespace mlpack::decision_stump;
+
+typedef AdaBoost<DecisionStump<>> ADABOOST_STUMP;
+typedef HoeffdingTree<GiniImpurity, HoeffdingDoubleNumericSplit> HOEFF_TREE;
+
+template <typename Type>
+class StatModel {
+private:
+    Type m_model;
+public:
+    /* 
+    StatModel(const double tolerance = 1e-6);
+
+    StatModel(const data::DatasetInfo& datasetInfo,
+              const size_t numClasses,
+              const double successProbability = 0.95,
+              const size_t maxSamples = 0,
+              const size_t checkInterval = 100,
+              const size_t minSamples = 10);
+    */
+    ~StatModel();
+    /* set model 
+    void set_model(const double tolerance = 1e-6);
+
+    void set_model(const data::DatasetInfo& datasetInfo,
+                   const size_t numClasses,
+                   const double successProbability = 0.95,
+                   const size_t maxSamples = 0,
+                   const size_t checkInterval = 100,
+                   const size_t minSamples = 10);
+    */
+    /* training and classification */
+    void train(mat train_data, arma::Row<size_t> train_labels);
+    void classify(mat test_data, arma::Row<size_t>& predictions);
+    /* serialization */
+    template<class Archive>
+    void Serialize(Archive& ar, const unsigned int version);
+};
+
+template<>
+class StatModel<ADABOOST_STUMP> {
+private:
+    ADABOOST_STUMP m_model;
+public:
+    void set_model(const double tolerance = 1e-6);
+    void train(mat train_data, arma::Row<size_t> train_labels);
+};
+
+template<>
+class StatModel<HOEFF_TREE> {
+private:
+    HOEFF_TREE m_model;
+public:
+    /* constructor for Hoeffding Tree */
+    void set_model(const data::DatasetInfo& datasetInfo,
+              const size_t numClasses,
+              const double successProbability = 0.95,
+              const size_t maxSamples = 0,
+              const size_t checkInterval = 100,
+              const size_t minSamples = 10);
+    void train(mat train_data, arma::Row<size_t> train_labels);
+};
+
+void StatModel<ADABOOST_STUMP>::set_model(const double tolerance) {
+    //static_assert(is_same<Type, ADABOOST_STUMP>::value, "Constructor \"StatModel()\" is only for Adaboost!");
+    m_model = ADABOOST_STUMP(tolerance);
+}
+
+void StatModel<HOEFF_TREE>::set_model(const data::DatasetInfo& datasetInfo,
+                     const size_t numClasses,
+                     const double successProbability,
+                     const size_t maxSamples,
+                     const size_t checkInterval,
+                     const size_t minSamples) {
+    //static_assert(is_same<Type, HOEFF_TREE>::value, "Constructor \"StatModel(DatasetInfo, numClass)\" is only for Adaboost!");
+    m_model = HOEFF_TREE(datasetInfo, numClasses, successProbability,
+                        maxSamples, checkInterval, minSamples);
+}
+
+template<typename Type>
+StatModel<Type>::~StatModel() {};
+
+void StatModel<HOEFF_TREE>::train(mat train_data, arma::Row<size_t> train_labels) {
+    m_model.Train(train_data, train_labels);
+}
+
+void StatModel<ADABOOST_STUMP>::train(mat train_data, arma::Row<size_t> train_labels) {
+        // initialize decision stump
+        DecisionStump<> ds(train_data, train_labels, 2, 6);
+        m_model.Train(train_data, train_labels, ds, 100, 1e-10);
+}
+
+template<typename Type>
+void StatModel<Type>::classify(mat test_data, arma::Row<size_t>& predictions) {
+    m_model.Classify(test_data, predictions);
+}
+
+template<typename Type>
+template<class Archive>
+void StatModel<Type>::Serialize(Archive& ar, const unsigned int version) {
+    ar & mlpack::data::CreateNVP(m_model, "m_model");
+}
+
+#endif

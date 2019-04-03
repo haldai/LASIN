@@ -1,0 +1,24 @@
+#include "arff_parser.h"
+#include "arff_data.h"
+
+#include <string>
+#include <iostream>
+
+typedef long int _size;
+
+int main() {
+    ArffParser parser("../../data/test/case5.arff");
+    ArffData *data = parser.parse();
+    /*
+    _size dim = 10;
+    std::vector<int> a = std::vector<int>(dim, (int) 0);
+    for (auto itr = a.begin(); itr != a.end(); ++itr)
+        std::cout << *itr << std::endl;
+    ArffValue *val = data->get_instance(0)->get(4);
+    std::vector<std::string> strs = *val;
+    for (auto itr = strs.begin(); itr != strs.end(); ++itr)
+        std::cout << *itr << std::endl;
+    */
+    data->get_hierarchical("class");
+    return 0;
+}

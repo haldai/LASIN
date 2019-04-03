@@ -1,0 +1,208 @@
+#include "memread.hpp"
+#include "data_set.hpp"
+#include "data_patch.hpp"
+#include "models.hpp"
+#include "utils.hpp"
+#include "errors.hpp"
+#include "../arff/arff_data.h"
+#include "../arff/arff_parser.h"
+
+#include <SWI-cpp.h>
+#include <SWI-Prolog.h>
+#include <mlpack/core.hpp>
+
+#include <unistd.h>
+#include <iostream>
+#include <sstream>
+#include <cstring>
+#include <ctime>
+#include <cmath>
+
+/* load_data(Featre_path, Label_path, Data)
+ * load a dataset into memory
+ */
+PREDICATE(load_data, 3) {
+    char *p1 = (char*) A1;
+    char *p2 = (char*) A2;
+    string feature_path(p1);
+    string label_path(p2);
+    DataPatch *data = new DataPatch(feature_path, label_path);
+    string add = ptr2str(data);
+    return A3 = PlTerm(add.c_str());
+}
+
+/* load_data(Featre_path, Data)
+ * load a dataset (no label) into memory
+ */
+PREDICATE(load_data, 2) {
+    char *p1 = (char*) A1;
+    string feature_path(p1);
+    DataPatch *data = new DataPatch(feature_path);
+    string add = ptr2str(data);
+    return A2 = PlTerm(add.c_str());
+}
+
+PREDICATE(load_ml_arff_with_label, 3) {
+    term_t t1 = A1.ref;
+    term_t t2 = A2.ref;
+    char *p1;
+    long p2;
+    if (PL_get_atom_chars(t1, &p1) && PL_get_long(t2, &p2)) {
+        if (p2 < 0) {
+            cerr << "Label index lower than 0!" << endl;
+            return FALSE;
+        }
+        ArffParser *parser = new ArffParser(p1);
+        //ArffParser *parser = new ArffParser("../../data/test/case5.arff");
+        ArffData* arff_data = parser->parse();
+        MLDataSet data(arff_data);
+        DataPatch *data_patch = new DataPatch(data.data_with_label(p2));
+        delete parser;
+        parser = NULL;
+        string data_addr = ptr2str(data_patch);
+        term_t t3 = PL_new_term_ref();
+        if (PL_put_atom_chars(t3, data_addr.c_str())) {
+            return A3 = PlTerm(t3);
+        } else
+            return PUT_ERROR("load_data_with_label/3", 3, "DATA_ADD", "STRING");
+    } else
+        return LOAD_ERROR("load_data_with_label/3", 12, "PATH, IDX", "STRING, INT");
+}
+
+/* Prolog data selector
+ * select_data(Data, Indices, Return)
+ * select data with indices [1, 2, 5, ...]
+ */
+PREDICATE(select_data, 3) {
+    term_t t1 = A1.ref;
+    char *p1 = (char*) A1;
+    DataPatch *data = str2ptr<DataPatch>(p1);
+    DataPatch *sub = new DataPatch(data->select_data(A2));
+    
+    // store the address of subset data in term_t
+    string a3_s = ptr2str(sub);
+    return A3 = PlTerm(a3_s.c_str());
+    /*
+    term_t a3_t = PL_new_term_ref();
+    if (PL_put_atom_chars(a3_t, a3_s.c_str()))
+        // return the term of the address of the subset data
+        return A3 = PlTerm(a3_t);
+    else
+        return PUT_ERROR("filter_data", 3, "ADD2", "STRING");
+    */
+}
+
+PREDICATE(free_ptr, 1) {
+        
+    term_t t1 = A1.ref;
+    char *p1;
+    if (PL_get_atom_chars(t1, &p1)) {
+        memAdd ptr = str2ptr<void>(p1);
+        free(ptr);
+        ptr = NULL;
+        return TRUE;
+    } else 
+        return LOAD_ERROR("free_ptr/1", 1, "PTR_ADD", "STRING");
+}
+
+PREDICATE(free_data_patch, 1) {
+        
+    term_t t1 = A1.ref;
+    char *p1;
+    if (PL_get_atom_chars(t1, &p1)) {
+        DataPatch *ptr = str2ptr<DataPatch>(p1);
+        free(ptr);
+        ptr = NULL;
+        return TRUE;
+    } else 
+        return LOAD_ERROR("free_DataPatch/1", 1, "PTR_ADD", "STRING");
+}
+
+PREDICATE(free_model, 1) {
+        
+    retract_model(A1);
+    term_t t1 = A1.ref;
+    char *p1;
+    if (PL_get_atom_chars(t1, &p1)) {
+        StatModel<MODEL_TYPE> ptr = str2ptr<StatModel<MODEL_TYPE>>(p1);
+        free(ptr);
+        ptr = NULL;
+        return TRUE;
+    } else
+        return LOAD_ERROR("free_model/1", 1, "PTR_ADD", "STRING");
+}
+
+/* DataPatch size aquirer
+ * @A1: DataPatch pointer
+ * @A2: Data size
+ */
+PREDICATE(get_data_size, 2) {
+        
+    term_t t1 = A1.ref;
+    char *p1;
+    if (PL_get_atom_chars(t1, &p1)) {
+        DataPatch *dataTrain = str2ptr<DataPatch>(p1);
+        term_t t2 = PL_new_term_ref(); // term for return
+        if (PL_put_int64(t2, (int64_t) dataTrain->size()))
+            return A2 = PlTerm(t2);
+        else
+            return PUT_ERROR("get_data_size/2", 2, "SIZE", "INT");
+    } else
+        return LOAD_ERROR("get_data_size/2", 1, "DATA_ADD", "STRING");
+}
+
+/* data_range_chk_positive(Data, Range)
+ * if the Data in range contains positive instance, return true; else false;
+ */
+PREDICATE(data_range_chk_positive, 2) {
+        
+    term_t t1 = A1.ref;
+    char *p1;
+    if (PL_get_atom_chars(t1, &p1)) {
+        DataPatch *data_patch = str2ptr<DataPatch>(p1);
+        PlTail tail(A2);
+        vector<long> range = list2vec<long>(tail);
+        urowvec *labels = data_patch->get_labels();
+        // judge if any positive instance in range
+        for (auto ptr = range.begin(); ptr != range.end(); ++ptr) 
+            if (labels->at((size_t) *ptr) > 0)
+                return TRUE;
+        return FALSE;
+    } else
+        return LOAD_ERROR("data_range_chk_positive/2", 1, "DATA_ADD", "STRING");
+}
+
+/* eval_range(DataPatch, Range, Err)
+ * @DataPatch: Data pointer
+ * @Range: data coverage to be evaluated
+ * @Err: returning error of the coverage
+ */
+PREDICATE(eval_range, 3) {
+        
+    term_t t1 = A1.ref;
+    char *p1;
+    if (PL_get_atom_chars(t1, &p1)) {
+        DataPatch *data_patch = str2ptr<DataPatch>(p1);
+        PlTail tail(A2);
+        vector<long> range = list2vec<long>(tail);
+
+        arma::Row<size_t> *labels = data_patch->get_labels_type<size_t>();
+        arma::Row<size_t> predictions(data_patch->size(), fill::zeros);
+        for (auto it = range.begin(); it != range.end(); ++it)
+            predictions[(int) *it] = 1;
+
+        //double err = error_rate(*labels, predictions);
+        double auc = aucroc(*labels, predictions);
+        //cout << "err: " << err << endl;
+        term_t t3 = PL_new_term_ref();
+        if (PL_put_float(t3, auc)) {
+            return A3 = PlTerm(t3);
+        } else {
+            cerr << "[eval_range] Writing @Err error!" << endl;
+            return FALSE;
+        }
+    } else {
+        cerr << "[eval_range] Reading @DataPatch error!" << endl;
+        return FALSE;
+    }
+}
