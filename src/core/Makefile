@@ -18,39 +18,39 @@ LIBS = -L$(SRCDIR) -L$(ARFFDIR) -L$(LIBSDIR) -L$(HOME)/.local/lib
 # Library prefix
 CXXFLAGS_MLPACK = `pkg-config --cflags mlpack`
 LDFLAGS_MLPACK = `pkg-config --libs mlpack`
-
+#
 # SWI-prolog
 CXXFLAGS_SWI = `pkg-config --cflags swipl`
-LDFLAGS_SWI = `pkg-config --libs swipl`
+LDFLAGS_SWI = `pkg-config --libs swipl` -lswipl
 
-all:test pl_data.so pl_models.so pl_mnist.so pl_cluster.so
+all: test pl_data.so pl_models.so pl_mnist.so pl_cluster.so
 
 test:test_abduce.o #arff ../arff/*.o
-	$(CXX) $(LDFLAGS) $(LDFLAGS_SWI) $(LDFLAGS_MLPACK) test_abduce.o -o test
+	$(CXX) $(LDFLAGS) test_abduce.o $(LDFLAGS_SWI) $(LDFLAGS_MLPACK) -o test
 
 test_abduce.o:
 	$(CXX) $(CXXFLAGS) $(CXXFLAGS_SWI) $(CXXFLAGS_MLPACK) -c test_abduce.cpp
 
 pl_data.so:pl_data.o
-	$(CXX) -shared $(LDFLAGS) $(LDFLAGS_MLPACK) pl_data.o -o pl_data.so
+	$(CXX) -shared $(LDFLAGS) pl_data.o $(LDFLAGS_MLPACK) -o pl_data.so
 
 pl_data.o:
 	$(CXX) $(CXXFLAGS) $(CXXFLAGS_SWI) -c pl_data.cpp
 
 pl_models.so:pl_models.o
-	$(CXX) -shared $(LDFLAGS) $(LDFLAGS_MLPACK) pl_models.o -o pl_models.so
+	$(CXX) -shared $(LDFLAGS) pl_models.o $(LDFLAGS_MLPACK) -o pl_models.so
 
 pl_models.o:
 	$(CXX) $(CXXFLAGS) $(CXXFLAGS_SWI) -c pl_models.cpp
 
 pl_cluster.so:pl_cluster.o
-	$(CXX) -shared $(LDFLAGS) $(LDFLAGS_MLPACK) pl_cluster.o -o pl_cluster.so
+	$(CXX) -shared $(LDFLAGS) pl_cluster.o $(LDFLAGS_MLPACK) -o pl_cluster.so
 
 pl_cluster.o:
 	$(CXX) $(CXXFLAGS) $(CXXFLAGS_SWI) -c pl_cluster.cpp
 
 pl_mnist.so:pl_mnist.o
-	$(CXX) -shared $(LDFLAGS) $(LDFLAGS_MLPACK) pl_mnist.o -o pl_mnist.so
+	$(CXX) -shared $(LDFLAGS) pl_mnist.o $(LDFLAGS_MLPACK) -o pl_mnist.so
 
 pl_mnist.o:
 	$(CXX) $(CXXFLAGS) $(CXXFLAGS_SWI) -c pl_mnist.cpp
