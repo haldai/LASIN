@@ -13,7 +13,7 @@ CXXFLAGS = -Wall -std=c++11 -fPIC -fopenmp $(COFLAGS) $(INCLUDE)
 COFLAGS = -DO_DEBUG -gdwarf-2 -g -O0
 LDFLAGS = -Wall -Winvalid-pch -fPIC -fopenmp $(LIBS) $(COFLAGS)
 INCLUDE = -I$(SRCDIR) -I$(ARFFDIR) -I$(INCLUDEDIR) -I$(HOME)/.local/include
-LIBS = -L$(SRCDIR) -L$(ARFFDIR) -L$(LIBSDIR) -L$(HOME)/.local/lib
+LIBS = -L$(SRCDIR) -L$(ARFFDIR) -L$(LIBSDIR) -L$(HOME)/.local/lib -L$(HOME)/.local/lib64
 
 # Library prefix
 CXXFLAGS_MLPACK = `pkg-config --cflags mlpack`
