@@ -28,31 +28,31 @@ all:test pl_data.so pl_models.so pl_mnist.so pl_cluster.so
 test:test_abduce.o #arff ../arff/*.o
         $(CXX) $(LDFLAGS) test_abduce.o $(LDFLAGS_SWI) $(LDFLAGS_MLPACK) -o test
 
-test_abduce.o:
+test_abduce.o:test_abduce.cpp
         $(CXX) $(CXXFLAGS) $(CXXFLAGS_SWI) $(CXXFLAGS_MLPACK) -c test_abduce.cpp
 
 pl_data.so:pl_data.o
         $(CXX) -shared $(LDFLAGS) pl_data.o $(LDFLAGS_MLPACK) -o pl_data.so
 
-pl_data.o:
+pl_data.o:pl_data.cpp
         $(CXX) $(CXXFLAGS) $(CXXFLAGS_SWI) -c pl_data.cpp
 
 pl_models.so:pl_models.o
         $(CXX) -shared $(LDFLAGS) pl_models.o $(LDFLAGS_MLPACK) -o pl_models.so
 
-pl_models.o:
+pl_models.o:pl_models.cpp
         $(CXX) $(CXXFLAGS) $(CXXFLAGS_SWI) -c pl_models.cpp
 
 pl_cluster.so:pl_cluster.o
         $(CXX) -shared $(LDFLAGS) pl_cluster.o $(LDFLAGS_MLPACK) -o pl_cluster.so
 
-pl_cluster.o:
+pl_cluster.o:pl_cluster.cpp
         $(CXX) $(CXXFLAGS) $(CXXFLAGS_SWI) -c pl_cluster.cpp
 
 pl_mnist.so:pl_mnist.o
         $(CXX) -shared $(LDFLAGS) pl_mnist.o $(LDFLAGS_MLPACK) -o pl_mnist.so
 
-pl_mnist.o:
+pl_mnist.o:pl_mnist.cp
         $(CXX) $(CXXFLAGS) $(CXXFLAGS_SWI) -c pl_mnist.cpp
 
 
