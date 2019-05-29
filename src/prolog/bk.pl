@@ -107,12 +107,28 @@ ink_(Img, P1, P2, 0):-
     ink_(Img, P1),
     ink_(Img, P2),
     !.
+
+point_equal([X1, Y1], [X2, Y2]):-
+    X1 == X2, Y1 == Y2.
+
 ink_(Img, P1, P2, T):-
     T > 0,
     midpoint(P1, P2, P3),
+    not(point_equal(P1, P3)),
+    not(point_equal(P2, P3)),
     T1 is T - 1,
     ink_(Img, P1, P3, T1),
     ink_(Img, P3, P2, T1).
+
+ink_(Img, P1, P2, T):-
+    T > 0,
+    midpoint(P1, P2, P3),
+    point_equal(P1, P3).
+    
+ink_(Img, P1, P2, T):-
+    T > 0,
+    midpoint(P1, P2, P3),
+    point_equal(P2, P3).
 
 midpoint([X1, Y1], [X2, Y2], [X3, Y3]):-
     X_d is (X1 + X2)/2,

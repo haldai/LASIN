@@ -77,7 +77,7 @@ vector<Type> list2vec(PlTerm term, int size) {
         }
         return re;
     } catch (...) {
-        cerr << "Parsing list error!" << endl;
+        cerr << "Parsing list2vec error!" << endl;
         return re;
     }
 }
@@ -139,7 +139,7 @@ vector<vector<Type>> list2vecvec(PlTerm term, int size_outer, int size_inner) {
             }
         }
     } catch (...) {
-        cerr << "Parsing list error!" << endl;
+        cerr << "Parsing list2vecvec error!" << endl;
     }
     return re;
 }
