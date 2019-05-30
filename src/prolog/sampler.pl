@@ -45,10 +45,11 @@ mnist_merge_mask(Data, C, M0, M, T):-
     append(M1, C, M2),
     list_to_set(M2, M3),
     get_instance(Data, T, Inst),
-    get_strokes_c(Inst, M3, Strokes),
-    strokes_mask([Strokes], [], M),
-    %get_strokes(Inst, M3, Strokes),
-    %strokes_mask(Strokes, [], M),
+    %get_strokes_c(Inst, M3, Strokes),
+    %strokes_mask([Strokes], [], M),
+    get_strokes(Inst, M3, Strokes),
+    strokes_mask(Strokes, [], M),
+    write(Strokes),
     free_vec(Inst).
     % num_components(T, NC),
     % spectral_cluster(M3, 2, 3, NC, M).
@@ -81,6 +82,7 @@ mnist_dim2coord_([D | Ds], [C | Cs]):-
 
 % stroke to mask
 strokes_mask([], Re, Re).
+strokes_mask([[]], Re, Re).
 strokes_mask([S | Ss], Temp, Masks):-
     stroke_points(S, [], M),
     length(M, LM),
@@ -88,7 +90,7 @@ strokes_mask([S | Ss], Temp, Masks):-
          (append(Temp, [M], Temp1),
           strokes_mask(Ss, Temp1, Masks), !);
      (strokes_mask(Ss, Temp, Masks), !)
-     ). 
+    ). 
 
 stroke_points([P], Temp, Re):-
     append(Temp, [P], Re).
