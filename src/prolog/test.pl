@@ -15,7 +15,7 @@ test(Atom, Weight1, Turn):-
     select_data(Codes, [1, 3, 5, 7, 9, 101, 103, 105, 107, 109], Sel),
     print_data(Sel),
     write('Model: '), write(Model), nl,
-    sc_save_dict(Model, '/home/daiwz/MATLAB/abduce/dict.csv'),
+    sc_save_dict(Model, 'dict.csv'),
     free_data(Data), free_data(Codes), free_data(Sel), free_sc(Model).
 
 test_centering:-
@@ -26,7 +26,8 @@ test_centering:-
     centering_data(Patches_, Patches),
     %print_data(Patches, '/home/daiwz/MATLAB/abduce/patches.csv'),
     print_data(Patches, 'patches.csv'),
-    sparse_coder(Patches, M, [500, 0.4, 0, 20], _),
+    %sparse_coder(Patches, M, [500, 0.4, 0, 20], _),
+    sparse_coder(Patches, M, [50, 4, 0, 20], _),
     %sc_save_dict(M, '/home/daiwz/MATLAB/abduce/dict.csv').
     sc_save_dict(M, 'dict.csv').
 test_mask:-

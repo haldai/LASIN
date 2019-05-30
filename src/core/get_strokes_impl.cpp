@@ -103,7 +103,7 @@ int line_in_image(const vector<vector<int>> & img, PointI2D A, PointI2D B){
     return point_in_image(img, A);
 }
 
-double distance(const PointI2D &A, const PointI2D &B){
+double distance2(const PointI2D &A, const PointI2D &B){
     const int dx = A.x - B.x;
     const int dy = A.y - B.y;
     return dx * dx + dy * dy;
@@ -123,7 +123,7 @@ vector<pair<PointI2D, PointI2D>> get_strokes(const vector<vector<int>> & img, co
         int max_dist_index = -1;
         for (unsigned int j = i + 1; j < pointList.size(); ++j){
             if (line_in_image(img, pointList[i], pointList[j])){
-                const double points_dist = distance(pointList[i], pointList[j]);
+                const double points_dist = distance2(pointList[i], pointList[j]);
                 if (points_dist > max_dist){
                     max_dist = points_dist;
                     max_dist_index = j;

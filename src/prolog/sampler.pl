@@ -46,8 +46,9 @@ mnist_merge_mask(Data, C, M0, M, T):-
     list_to_set(M2, M3),
     get_instance(Data, T, Inst),
     get_strokes_c(Inst, M3, Strokes),
-    % get_strokes(Inst, M3, Strokes),
     strokes_mask([Strokes], [], M),
+    %get_strokes(Inst, M3, Strokes),
+    %strokes_mask(Strokes, [], M),
     free_vec(Inst).
     % num_components(T, NC),
     % spectral_cluster(M3, 2, 3, NC, M).
