@@ -105,52 +105,6 @@ int used_image(vector<vector<bool>> & used, const vector<PointI2D> &pointList, P
 /* 
  * If Points not in image, this ugly code can help it quit quickly.
  * */
-
-//
-//
-//    int x1 = p1[0],
-//        y1 = p1[1],
-//        x2 = p2[0],
-//        y2 = p2[1];
-//	int dx = abs(x2 - x1),
-//		dy = abs(y2 - y1),
-//		yy = 0;
-//	if (dx < dy) {
-//		yy = 1;
-//		swap_int(&x1, &y1);
-//		swap_int(&x2, &y2);
-//		swap_int(&dx, &dy);
-//	}
-//	int ix = (x2 - x1) > 0 ? 1 : -1,
-//        iy = (y2 - y1) > 0 ? 1 : -1,
-//        cx = x1,
-//        cy = y1,
-//        n2dy = dy * 2,
-//        n2dydx = (dy - dx) * 2,
-//        d = dy * 2 - dx;
-//	if (yy) { 
-//		while (cx != x2) {
-//			if (d < 0) {
-//				d += n2dy;
-//			} else {
-//				cy += iy;
-//				d += n2dydx;
-//			}
-//            points.push_back(vector<long>({(long) cy, (long) cx}));
-//			cx += ix;
-//		}
-//	} else { 
-//		while (cx != x2) {
-//			if (d < 0) {
-//				d += n2dy;
-//			} else {
-//				cy += iy;
-//				d += n2dydx;
-//			}
-//            points.push_back(vector<long>({(long) cx, (long) cy}));
-//			cx += ix;
-//		}
-//	}
 int line_in_image(const vector<vector<int>> & img, PointI2D A, PointI2D B){
     if (point_in_image(img, A) == false or point_in_image(img, B) == false){
         return false;
