@@ -207,11 +207,12 @@ PointI2D operator-(const PointI2D &A, const PointI2D &B){
     return PointI2D(A.x - B.x, A.y - B.y);
 }
 
-vector<vector<int>> strokes_merge(vector<pair<PointI2D, PointI2D>> &pointList){
+vector<vector<int>> strokes_merge(const vector<vector<int>> & img, vector<pair<PointI2D, PointI2D>> &pointList){
     vector<bool> used(pointList.size(), false);
     vector<vector<int>> strokes;
     
     const double DIST_THRESH2 = 10;
+    const double ANG_THRESH = cos(3.141592 / 6);
 
     for (unsigned int i = 0; i < pointList.size(); ++i){
         if (used[i]){
@@ -236,7 +237,7 @@ vector<vector<int>> strokes_merge(vector<pair<PointI2D, PointI2D>> &pointList){
                     dist = dist2;
                     swaped = true;
                 }
-                if (dist * dist < DIST_THRESH2){
+                if (dist * dist < DIST_THRESH2 and line_in_image(img, curP, pointList[j].first)){
                     PointI2D AVec = curP - pointList[cur_point_id].first;
                     PointI2D BVec = pointList[j].second - pointList[j].first;
                     const double cos_ang = dot(AVec, BVec) / norm(AVec) / norm(BVec);
@@ -251,7 +252,7 @@ vector<vector<int>> strokes_merge(vector<pair<PointI2D, PointI2D>> &pointList){
                     swap(pointList[j].first, pointList[j].second);
                 }
             }
-            if (candidate != -1){
+            if (candidate != -1 and min_angle < ANG_THRESH){
                 continue_flag = true;
                 if (need_swap){
                     swap(pointList[candidate].first, pointList[candidate].second);
