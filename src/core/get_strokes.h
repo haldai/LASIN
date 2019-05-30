@@ -11,6 +11,8 @@ struct PointI2D{
     int y;
     PointI2D(const int _x, const int _y);
     PointI2D();
+
+    PointI2D& operator=(const PointI2D &A);
 };
 
 std::vector<std::pair<PointI2D, PointI2D>> get_strokes(const std::vector<std::vector<int>> & img, const std::vector<PointI2D> & pointList);
