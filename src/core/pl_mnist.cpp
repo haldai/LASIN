@@ -2,15 +2,47 @@
 #include "data_patch.hpp"
 #include "utils.hpp"
 
+#include "get_strokes.h"
+
 #include <SWI-cpp.h>
 #include <SWI-Prolog.h>
 #include <mlpack/core.hpp>
 
-using namespace std;
 using namespace arma;
 
 /* swap int for bresenham algorithm */
 inline void swap_int(int *a, int *b);
+
+/* get_strokes(Img, Points, strokes)
+ * Img     : pointer of a colvec
+ * Points  : a group of 2d positions, [[x1, y1], [x2, y2], ...]
+ * strokes : a group of 2d positions, [[x1, y1], [x2, y2], ...]
+ */
+PREDICATE(get_strokes_c, 3){
+    char *add = (char*) A1;
+    vec *data = str2ptr<vec>(add);
+    mat ori_img(*data);
+    ori_img.reshape(28, 28);
+
+    vector<vector<int>> img(28);
+    for (int i = 0; i < 28; ++i){
+        for (int j = 0; j < 28; ++j){
+            img[i].push_back((int)(ori_img(i, j) * 255));
+        }
+    }
+    vector<vector<int>> points = list2vecvec<int>(A2, -1, 2);
+    vector<PointI2D> pointList;
+    for (unsigned int i = 0; i < points.size(); ++i){
+        pointList.push_back(PointI2D(points[i][0], points[i][1]));
+    }
+    vector<pair<PointI2D, PointI2D>> strokes_res = get_strokes(img, pointList);
+    vector<vector<long>> strokes;
+    for (unsigned int i = 0; i < strokes_res.size(); ++i){
+        strokes.push_back(vector<long>({(long) strokes_res[i].first.x, (long) strokes_res[i].first.y}));
+        strokes.push_back(vector<long>({(long) strokes_res[i].second.x, (long) strokes_res[i].second.y}));
+    }
+    return A3 = vecvec2list<long>(strokes);
+}
 
 /* mnist_create_mask(Centers, Neighbor_size, Mask)
  * Centers: a group of 2d positions, [[x1, y1], [x2, y2], ...]
@@ -120,8 +152,14 @@ PREDICATE(left_of, 2) {
 }
 */
 
-inline void swap_int(int *a, int *b) {
-	*a ^= *b;
-	*b ^= *a;
-	*a ^= *b;
+
+inline void swap_int(int *a, int *b){
+    int t = *a;
+    *a = *b;
+    *b = t;
 }
+//inline void swap_int(int *a, int *b) {
+//	*a ^= *b;
+//	*b ^= *a;
+//	*a ^= *b;
+//}

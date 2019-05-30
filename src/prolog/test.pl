@@ -15,7 +15,7 @@ test(Atom, Weight1, Turn):-
     select_data(Codes, [1, 3, 5, 7, 9, 101, 103, 105, 107, 109], Sel),
     print_data(Sel),
     write('Model: '), write(Model), nl,
-    sc_save_dict(Model, '/home/daiwz/MATLAB/abduce/dict.csv'),
+    sc_save_dict(Model, 'dict.csv'),
     free_data(Data), free_data(Codes), free_data(Sel), free_sc(Model).
 
 test_centering:-
@@ -24,9 +24,12 @@ test_centering:-
     mnist_gen_masks(Data, _, 0.5, [], _, Mask),
     sc_mask_patches(Data, Mask, Patches_),
     centering_data(Patches_, Patches),
-     print_data(Patches, '/home/daiwz/MATLAB/abduce/patches.csv'),
-    sparse_coder(Patches, M, [500, 0.4, 0, 20], _),
-    sc_save_dict(M, '/home/daiwz/MATLAB/abduce/dict.csv').
+    %print_data(Patches, '/home/daiwz/MATLAB/abduce/patches.csv'),
+    print_data(Patches, 'patches.csv'),
+    %sparse_coder(Patches, M, [500, 0.4, 0, 20], _),
+    sparse_coder(Patches, M, [50, 4, 0, 20], _),
+    %sc_save_dict(M, '/home/daiwz/MATLAB/abduce/dict.csv').
+    sc_save_dict(M, 'dict.csv').
 test_mask:-
     load_data('../../data/dev2k.csv', Data),
     %load_data('../../data/dev10.csv', Data),
@@ -41,7 +44,7 @@ test_mask:-
     %sc_save_dict(M2, '/home/daiwz/MATLAB/abduce/dict.csv').
 
 test_go(Turn, Model, [Atom, L1, L2, SC_Turn]):-
-    load_data('../../data/MNIST_100.csv', Data),
+    load_data('../../data/MNIST_1000.csv', Data),
     test_learn(Data, _, 0.5, [Atom, L1, L2, SC_Turn], [], Turn, Model), !.
 
 
@@ -61,19 +64,21 @@ test_go_os2(Turn, Model, [Atom, L1, L2, SC_Turn], _):-
     load_data('../../data/omniglot_small2_train.csv', Data),
     test_learn(Data, _, 0.5, [Atom, L1, L2, SC_Turn], [], Turn, Model), !.
 
-test_learn(_, M, _, _, _, 0, Model_final, _):-
+test_learn(_, M, _, _, _, 0, Model_final):-
     Model_final = M,
     !.
-test_learn(Data, M, Thresh, Param, Last_Centers, T, Model_final, BG):-
+test_learn(Data, M, Thresh, Param, Last_Centers, T, Model_final):-
     Param = [Atom, L1, L2, SC_Turn],
     mnist_gen_masks(Data, M, Thresh, Last_Centers, New_Centers, Mask),
     sc_mask_patches(Data, Mask, Patches),
-    % print_data(Patches, '/home/daiwz/MATLAB/abduce/patches.csv'),
+    print_data(Patches, 'patches.csv'),
     sparse_coder(Patches, M1, [Atom, L1, L2, SC_Turn], _),
     % save dict for each turn
-    Fname = '/home/daiwz/MATLAB/abduce/dict',
-    D1name = '/home/lamda/Storage_SV52/daiwz/abduce/results/',
-    D2 = BG,
+    %Fname = '/home/daiwz/MATLAB/abduce/dict',
+    Fname = 'dict',
+    %D1name = '/home/lamda/Storage_SV52/daiwz/abduce/results/',
+    D1name = 'results/',
+    %D2 = BG,
     Ftail = '.csv',
     name(Fname, NList), name(T, NT), name(Ftail, NTL),
     append(NT, NTL, NTT),
