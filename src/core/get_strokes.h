@@ -17,5 +17,7 @@ struct PointI2D{
 
 std::vector<std::pair<PointI2D, PointI2D>> get_strokes(const std::vector<std::vector<int>> & img, const std::vector<PointI2D> & pointList);
 
+std::vector<std::vector<int>> strokes_merge(const std::vector<std::vector<int>> & img, std::vector<std::pair<PointI2D, PointI2D>> &pointList);
+
 #endif
 

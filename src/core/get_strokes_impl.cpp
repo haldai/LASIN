@@ -11,6 +11,7 @@ PointI2D::PointI2D(const int _x, const int _y): x(_x), y(_y){}
 PointI2D::PointI2D(): x(0), y(0){}
 
 const int thresh = 200;
+const int GLOBAL_DIST_THRESH = 6;
 
 double distance2(const PointI2D &A, const PointI2D &B){
     const int dx = A.x - B.x;
@@ -75,7 +76,7 @@ int used_image(vector<vector<bool>> & used, const vector<PointI2D> &pointList, P
 			}
             //points.push_back(vector<long>({(long) cy, (long) cx}));
             for (auto A : pointList){
-                if (distance2(A, PointI2D(cy, cx)) < 10){
+                if (distance2(A, PointI2D(cy, cx)) < GLOBAL_DIST_THRESH / 2){
                     used[A.x][A.y] = true;
                 }
             }
@@ -92,7 +93,7 @@ int used_image(vector<vector<bool>> & used, const vector<PointI2D> &pointList, P
             //points.push_back(vector<long>({(long) cx, (long) cy}));
             //used[cx][cy] = true;
             for (auto A : pointList){
-                if (distance2(A, PointI2D(cx, cy)) < 10){
+                if (distance2(A, PointI2D(cx, cy)) < GLOBAL_DIST_THRESH / 2){
                     used[A.x][A.y] = true;
                 }
             }
@@ -211,8 +212,8 @@ vector<vector<int>> strokes_merge(const vector<vector<int>> & img, vector<pair<P
     vector<bool> used(pointList.size(), false);
     vector<vector<int>> strokes;
     
-    const double DIST_THRESH2 = 10;
-    const double ANG_THRESH = cos(3.141592 / 6);
+    const double DIST_THRESH2 = GLOBAL_DIST_THRESH * 2;
+    const double ANG_THRESH = 3.141592 / 10 * 9;
 
     for (unsigned int i = 0; i < pointList.size(); ++i){
         if (used[i]){
@@ -228,6 +229,9 @@ vector<vector<int>> strokes_merge(const vector<vector<int>> & img, vector<pair<P
             bool need_swap = false;
             PointI2D curP = pointList[cur_point_id].second;
             for (unsigned int j = i + 1; j < pointList.size(); ++j){
+                if (used[j]){
+                    continue;
+                }
                 bool swaped = false;
                 double dist1 = sqrt(distance2(curP, pointList[j].first));
                 double dist2 = sqrt(distance2(curP, pointList[j].second));
@@ -258,6 +262,7 @@ vector<vector<int>> strokes_merge(const vector<vector<int>> & img, vector<pair<P
                     swap(pointList[candidate].first, pointList[candidate].second);
                 }
                 cur_point_id = candidate;
+                used[candidate] = true;
                 strokes.back().push_back(candidate);
             }
         }
