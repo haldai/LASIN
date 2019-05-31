@@ -36,12 +36,27 @@ PREDICATE(get_strokes_c, 3){
         pointList.push_back(PointI2D(points[i][0], points[i][1]));
     }
     vector<pair<PointI2D, PointI2D>> strokes_res = get_strokes(img, pointList);
-    vector<vector<long>> strokes;
-    for (unsigned int i = 0; i < strokes_res.size(); ++i){
-        strokes.push_back(vector<long>({(long) strokes_res[i].first.x, (long) strokes_res[i].first.y}));
-        strokes.push_back(vector<long>({(long) strokes_res[i].second.x, (long) strokes_res[i].second.y}));
+    vector<vector<int>> line_res = strokes_merge(img, strokes_res);
+    //for (auto line : line_res){
+    //    for (unsigned int i = 0; i < line.size(); ++i){
+    //        cout << line[i] << ' ';
+    //    }cout << endl;
+    //}
+
+    vector<vector<vector<long>>> strokes;
+    for (unsigned int i = 0; i < line_res.size(); ++i){
+        vector<vector<long>> tmp_strokes;
+        for (auto idx : line_res[i]){
+            tmp_strokes.push_back(vector<long>({(long) strokes_res[idx].first.x, (long) strokes_res[i].first.y}));
+            tmp_strokes.push_back(vector<long>({(long) strokes_res[idx].second.x, (long) strokes_res[i].second.y}));
+        }
+        //strokes.push_back(vector<long>({(long) strokes_res[i].first.x, (long) strokes_res[i].first.y}));
+        //strokes.push_back(vector<long>({(long) strokes_res[i].second.x, (long) strokes_res[i].second.y}));
+        //cout << i << " : " << strokes_res[i].first.x << " " << strokes_res[i].first.y 
+        //    << ' ' << strokes_res[i].second.x << ' ' << strokes_res[i].second.y << endl;
+        strokes.push_back(tmp_strokes);
     }
-    return A3 = vecvec2list<long>(strokes);
+    return A3 = vecvecvec2list<long>(strokes);
 }
 
 /* mnist_create_mask(Centers, Neighbor_size, Mask)

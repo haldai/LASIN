@@ -30,6 +30,9 @@ template <class Type>
 PlTerm vecvec2list(vector<vector<Type>> vec, int size_outer = -1,
                                  int size_inner = -1);
 
+template <class Type>
+PlTerm vecvecvec2list(vector<vector<vector<Type>>> vec);
+
 /* Return an empty list */
 PlTerm empty_list();
 
@@ -169,6 +172,30 @@ PlTerm vecvec2list(vector<vector<Type>> vec, int size_outer, int size_inner) {
             }
             points_tail.close();
             re_tail.append(points_term);
+        }
+        re_tail.close();
+    } catch (...) {
+        cerr << "Parsing list error!" << endl;
+    }
+    return re_term;
+}
+
+template <class Type>
+PlTerm vecvecvec2list(vector<vector<vector<Type>>> vec) {
+    static_assert((is_same<Type, long>::value)
+                  || (is_same<Type, double>::value)
+                  || (is_same<Type, wchar_t*>::value)
+                  || (is_same<Type, char*>::value)
+                  || (is_same<Type, PlTerm>::value),
+                  "Wrong template type for list2vecvec!");
+    term_t re_ref = PL_new_term_ref();
+    PlTerm re_term(re_ref);
+    PlTail re_tail(re_term);
+
+    try {
+        const int first_layer_size = vec.size();
+        for (int first_idx = 0; first_idx < first_layer_size; first_idx++) {
+            re_tail.append(vecvec2list(vec[first_idx]));
         }
         re_tail.close();
     } catch (...) {

@@ -182,12 +182,12 @@ PREDICATE(sc_mask_patches, 3) {
         return FALSE;
     }
     vector<Col<double>> patches;
-    int total = 0;
+    //int total = 0;
     for (int i = 0; i < num; i++) {
         vector<char*> ms = pts[i];
         int num_mask = ms.size();
-        total += num_mask;
-        cout << i << ' ' << num_mask << ' ' << total << endl;
+        //total += num_mask;
+        //cout << i << ' ' << num_mask << ' ' << total << endl;
         Col<double> inst = data->get_feature(i);
         // apply masks
         for (int j = 0; j < num_mask; j++) {
