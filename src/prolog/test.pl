@@ -44,7 +44,11 @@ test_mask:-
     %sc_save_dict(M2, '/home/daiwz/MATLAB/abduce/dict.csv').
 
 test_go(Turn, Model, [Atom, L1, L2, SC_Turn]):-
-    load_data('../../data/MNIST_1000.csv', Data),
+    % load_data('../../data/MNIST_1.csv', Data),
+    %load_data('../../data/dev2k.csv', Data),
+    load_data('../../data/dev10.csv', Data),
+    % load_data('../../data/MNIST_1000.csv', Data),
+    %load_data('../../data/MNIST_test.csv', Data),
     test_learn(Data, _, 0.5, [Atom, L1, L2, SC_Turn], [], Turn, Model), !.
 
 
@@ -70,6 +74,8 @@ test_learn(_, M, _, _, _, 0, Model_final):-
 test_learn(Data, M, Thresh, Param, Last_Centers, T, Model_final):-
     Param = [Atom, L1, L2, SC_Turn],
     mnist_gen_masks(Data, M, Thresh, Last_Centers, New_Centers, Mask),
+    %write(Mask),
+    %print_data(Mask, 'mask.csv'),
     sc_mask_patches(Data, Mask, Patches),
     print_data(Patches, 'patches.csv'),
     sparse_coder(Patches, M1, [Atom, L1, L2, SC_Turn], _),
