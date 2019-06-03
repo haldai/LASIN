@@ -45,8 +45,8 @@ mnist_merge_mask(Data, C, M0, M, T):-
     append(M1, C, M2),
     list_to_set(M2, M3),
     get_instance(Data, T, Inst),
-    %get_strokes_c(Inst, M3, Strokes),
-    get_strokes(Inst, M3, Strokes),
+    get_strokes_c(Inst, M3, Strokes),
+    %get_strokes(Inst, M3, Strokes),
     strokes_mask(Strokes, [], M),
     write(Strokes),
     free_vec(Inst).

@@ -45,10 +45,11 @@ test_mask:-
 
 test_go(Turn, Model, [Atom, L1, L2, SC_Turn]):-
     % load_data('../../data/MNIST_1.csv', Data),
-    %load_data('../../data/dev2k.csv', Data),
-    load_data('../../data/dev10.csv', Data),
+    % load_data('../../data/dev2k.csv', Data),
+    % load_data('../../data/dev10.csv', Data),
     % load_data('../../data/MNIST_1000.csv', Data),
-    %load_data('../../data/MNIST_test.csv', Data),
+    % load_data('../../data/MNIST_test.csv', Data),
+    load_data('../../data/omniglot_small1_train.csv', Data),
     test_learn(Data, _, 0.5, [Atom, L1, L2, SC_Turn], [], Turn, Model), !.
 
 
@@ -98,7 +99,7 @@ test_learn(Data, M, Thresh, Param, Last_Centers, T, Model_final):-
 test_stroke:-
     load_data('../../data/MNIST_100.csv', Data),
     get_instance(Data, 0, Inst),
-    sc_sample_mask_center(Data, Model, 0.5, 50, Bad_dims),
+    sc_sample_mask_center(Data, Model, 0.5, 200, Bad_dims),
     write('sample mask OK!'), nl,
     mnist_dim2coord(Bad_dims, [P0 | _]),
     write('coordinate trans OK!'), nl,
