@@ -51,6 +51,12 @@ First add the library paths of `mlpack` and `swipl` to your `LD_LIBRARY_PATH`:
 export LD_LIBRARY_PATH=/usr/local/lib/swipl/lib/x86_64-linux:/usr/local/lib64:$LD_LIBRARY_PATH
 ```
 
+Extract the dataset:
+
+``` shell
+tar -xvf data.tar.bz2
+```
+
 Then call the testing prolog scripts in `src/prolog` directory to run the
 experiments:
 
@@ -70,9 +76,9 @@ More parameter settings and examples are listed in `learn_dict.pl` and
 
 ## Remark
 
-__We are optimising and tidying up the code, the configuration and parameter
-meanings will be added to this README file after the cleanup. Sorry about the
-inconvenience!__
+We are optimising and tidying up the code, instructions about configuration
+and parameter settings will be added to this README file after the cleanup.
+Sorry about the inconvenience!
 
 # Reference
 - W.-Z. Dai and Z.-H. Zhou. Combining logic abduction and statistical induction: Discovering written primitives with human knowledge. In: Proceedings of the 31st AAAI Conference on Artificial Intelligence (AAAI'17), San Francisco, CA, 2017, pp.4392-4398.
