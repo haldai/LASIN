@@ -1,6 +1,7 @@
 % background knowledge for sampling mnist
 %========================================
 :- use_module(library(random)).
+:- discontiguous ink_/4.
 
 recursion_limit(6).
 neighbor_size(4).
@@ -33,7 +34,7 @@ get_strokes(_, [], Re, Re, _).
 get_strokes(_, Points, Re, Re, T):-
     length(Points, T).
 get_strokes(Img, Points, Strokes, Re, _):-
-    random_permutation(Points, Points_),    
+    random_permutation(Points, Points_),
     greedy_discover_stroke(Img, Points_, Wasted, S),
     length(S, L),
     L > 2,
@@ -124,7 +125,7 @@ ink_(Img, P1, P2, T):-
     T > 0,
     midpoint(P1, P2, P3),
     point_equal(P1, P3).
-    
+
 ink_(Img, P1, P2, T):-
     T > 0,
     midpoint(P1, P2, P3),

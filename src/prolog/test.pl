@@ -5,6 +5,8 @@
    load_foreign_library(foreign('../core/pl_cluster.so')),
    load_foreign_library(foreign('../core/pl_mnist.so')).
 
+:- discontiguous ink_/4.
+
 test(Atom, Weight1, Turn):-
     load_data('../../data/MNIST_100.csv', Data),
     write('Data loaded.'), nl,
