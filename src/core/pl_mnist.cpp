@@ -47,8 +47,8 @@ PREDICATE(get_strokes_c, 3){
     for (unsigned int i = 0; i < line_res.size(); ++i){
         vector<vector<long>> tmp_strokes;
         for (auto idx : line_res[i]){
-            tmp_strokes.push_back(vector<long>({(long) strokes_res[idx].first.x, (long) strokes_res[i].first.y}));
-            tmp_strokes.push_back(vector<long>({(long) strokes_res[idx].second.x, (long) strokes_res[i].second.y}));
+            tmp_strokes.push_back(vector<long>({(long) strokes_res[idx].first.x, (long) strokes_res[idx].first.y}));
+            tmp_strokes.push_back(vector<long>({(long) strokes_res[idx].second.x, (long) strokes_res[idx].second.y}));
         }
         //strokes.push_back(vector<long>({(long) strokes_res[i].first.x, (long) strokes_res[i].first.y}));
         //strokes.push_back(vector<long>({(long) strokes_res[i].second.x, (long) strokes_res[i].second.y}));

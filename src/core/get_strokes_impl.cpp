@@ -11,7 +11,7 @@ PointI2D::PointI2D(const int _x, const int _y): x(_x), y(_y){}
 PointI2D::PointI2D(): x(0), y(0){}
 
 const int thresh = 200;
-const int GLOBAL_DIST_THRESH = 6;
+const int GLOBAL_DIST_THRESH = 5;
 
 double distance2(const PointI2D &A, const PointI2D &B){
     const int dx = A.x - B.x;
@@ -221,13 +221,16 @@ vector<vector<int>> strokes_merge(const vector<vector<int>> & img, vector<pair<P
         }
         strokes.push_back(vector<int>(1, i));
         int cur_point_id = i;
+        used[cur_point_id] = true;
         bool continue_flag = true;
+        double strokes_len = 0;
         while (continue_flag){
             continue_flag = false;
             int candidate = -1;
             double min_angle = -1000;
             bool need_swap = false;
             PointI2D curP = pointList[cur_point_id].second;
+            strokes_len += norm(pointList[cur_point_id].second - pointList[cur_point_id].first);
             for (unsigned int j = i + 1; j < pointList.size(); ++j){
                 if (used[j]){
                     continue;
@@ -265,6 +268,11 @@ vector<vector<int>> strokes_merge(const vector<vector<int>> & img, vector<pair<P
                 used[candidate] = true;
                 strokes.back().push_back(candidate);
             }
+        }
+
+        //This code may help LASIN get longer strokes.
+        if (strokes_len < 8 || strokes.back().size() < 2){
+            strokes.pop_back();
         }
     }
     return strokes;
